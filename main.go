@@ -11,11 +11,14 @@ import (
 )
 
 var (
-	db             *gorm.DB                  = config.SetUpDatabaseConnection()
-	userRepository repository.UserRepository = repository.NewUserRepository(db)
-	authService    service.AuthService       = service.NewAuthService(userRepository)
-	jwtService     service.JWTService        = service.NewJWTService()
-	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
+	db                *gorm.DB                     = config.SetUpDatabaseConnection()
+	userRepository    repository.UserRepository    = repository.NewUserRepository(db)
+	authService       service.AuthService          = service.NewAuthService(userRepository)
+	jwtService        service.JWTService           = service.NewJWTService()
+	authController    controller.AuthController    = controller.NewAuthController(authService, jwtService)
+	productRepository repository.ProductRepository = repository.NewProductRepository(db)
+	productService    service.ProductService       = service.NewProductService(productRepository)
+	productController controller.ProductController = controller.NewProductController(productService, jwtService)
 )
 
 func main() {
@@ -34,6 +37,11 @@ func main() {
 	{
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/register", authController.Register)
+	}
+	// Product Route
+	productRoutes := router.Group(baseUrl + "/product")
+	{
+		productRoutes.GET("/", productController.All)
 	}
 
 	router.Run(":8080")
